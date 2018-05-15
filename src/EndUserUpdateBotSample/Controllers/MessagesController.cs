@@ -2,6 +2,8 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
+using EndUserUpdateBotSample.Repositories;
+using EndUserUpdateBotSample.Services;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Connector;
 
@@ -10,6 +12,15 @@ namespace EndUserUpdateBotSample.Controllers
     [BotAuthentication]
     public class MessagesController : ApiController
     {
+        private readonly IRegistrationRepository _repository;
+        private readonly ISMSClient _smsClient;
+
+        public MessagesController(IRegistrationRepository repository, ISMSClient smsClient)
+        {
+            _repository = repository;
+            _smsClient = smsClient;
+        }
+
         /// <summary>
         /// POST: api/Messages
         /// Receive a message from a user and reply to it

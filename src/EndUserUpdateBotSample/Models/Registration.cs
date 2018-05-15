@@ -13,6 +13,7 @@ namespace EndUserUpdateBotSample.Models
         public string Name { get; set; }
         [DisplayName("Phone Number")]
         public string PhoneNumber { get; set; }
+        [DisplayName("Security Code")]
         public string SecurityCode { get; set; }
         public string Status { get; set; }
     }

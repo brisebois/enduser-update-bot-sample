@@ -7,7 +7,7 @@ using System.Web;
 
 namespace EndUserUpdateBotSample.Repositories
 {
-    public interface IRegistrationRepository
+    public interface IRegistrationRepository : IDisposable
     {
         Task AddAsync(Registration registration);
 
@@ -18,6 +18,10 @@ namespace EndUserUpdateBotSample.Repositories
         Task<IList<Registration>> GetAll();
 
         Task<Registration> GetById(string id);
+
+        Task<IList<Registration>> GetByStatus(string status);
+
+        Task<IList<Registration>> GetUnconfirmedByPhoneNumber(string phoneNumber);
 
         Task InitStore(string databaseName, string collectionName);
     }

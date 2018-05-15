@@ -1,11 +1,18 @@
 ﻿using System.Threading.Tasks;
 using System.Web.Mvc;
 using EndUserUpdateBotSample.Models;
+using EndUserUpdateBotSample.Repositories;
 
 namespace EndUserUpdateBotSample.Controllers
 {
     public class UpdatesController : Controller
     {
+        private readonly IRegistrationRepository _repository;
+        public UpdatesController(IRegistrationRepository repository)
+        {
+            _repository = repository;
+        }
+
         // GET: Updates/Create
         public ActionResult Create()
         {
@@ -17,14 +24,14 @@ namespace EndUserUpdateBotSample.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create([Bind(Include = "Message")] Update update)
+        public async Task<ActionResult> Publish([Bind(Include = "Message")] Update update)
         {
             if (ModelState.IsValid)
             {
-                return RedirectToAction("Index", "Registrations");
+                var confirmedRegistrations = await _repository.GetByStatus("Confirmed");
             }
 
-            return View(update);
+            return RedirectToAction("Create");
         }
     }
 }

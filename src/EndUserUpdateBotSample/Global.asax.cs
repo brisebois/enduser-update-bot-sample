@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using Autofac.Integration.Mvc;
+using Autofac.Integration.WebApi;
 using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
@@ -16,6 +17,7 @@ namespace EndUserUpdateBotSample
             // Register your MVC controllers. (MvcApplication is the name of
             // the class in Global.asax.)
             builder.RegisterControllers(typeof(WebApiApplication).Assembly);
+            builder.RegisterApiControllers(typeof(WebApiApplication).Assembly);
 
             // OPTIONAL: Register model binders that require DI.
             builder.RegisterModelBinders(typeof(WebApiApplication).Assembly);
@@ -31,6 +33,7 @@ namespace EndUserUpdateBotSample
             builder.RegisterFilterProvider();
 
             StoreConfig.Configure(builder);
+            TwilioConfig.Configure(builder);
 
             // Set the dependency resolver to be Autofac.
             var container = builder.Build();

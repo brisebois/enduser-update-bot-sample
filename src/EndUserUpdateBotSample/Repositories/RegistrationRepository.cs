@@ -22,19 +22,19 @@ namespace EndUserUpdateBotSample.Repositories
             _collectionName = collectionName;
         }
 
-        public Task AddAsync(Registration registration)
+        public async Task AddAsync(Registration registration)
         {
-            throw new NotImplementedException();
+            await _client.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(_dbName, _collectionName), registration);
         }
 
-        public Task DeleteAsync(string id)
+        public async Task DeleteAsync(string id)
         {
-            throw new NotImplementedException();
+            var registration = await _client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(_dbName, _collectionName, id));
         }
 
-        public Task UpdateAsync(Registration registration)
+        public async Task UpdateAsync(Registration registration)
         {
-            throw new NotImplementedException();
+            await _client.ReplaceDocumentAsync(UriFactory.CreateDocumentUri(_dbName, _collectionName, registration.Id), registration);
         }
 
         public async Task InitStore(string dbName, string collectionName)
@@ -53,9 +53,46 @@ namespace EndUserUpdateBotSample.Repositories
             return Task.FromResult<IList<Registration>>(registrationQuery.ToList());
         }
 
-        public Task<Registration> GetById(string id)
+        public async Task<Registration> GetById(string id)
         {
-            throw new NotImplementedException();
+            var registration = await _client.ReadDocumentAsync<Registration>(UriFactory.CreateDocumentUri(_dbName, _collectionName, id));
+            return registration;
+        }
+
+        public Task<IList<Registration>> GetByStatus(string status)
+        {
+            FeedOptions queryOptions = new FeedOptions { MaxItemCount = -1 };
+
+            IQueryable<Registration> registrationQuery = _client.CreateDocumentQuery<Registration>(
+                UriFactory.CreateDocumentCollectionUri(_dbName, _collectionName), queryOptions)
+                .Where(r => r.Status == status);
+
+            return Task.FromResult<IList<Registration>>(registrationQuery.ToList());
+        }
+
+        public Task<IList<Registration>> GetUnconfirmedByPhoneNumber(string phoneNumber)
+        {
+            FeedOptions queryOptions = new FeedOptions { MaxItemCount = -1 };
+
+            IQueryable<Registration> registrationQuery = _client.CreateDocumentQuery<Registration>(
+                UriFactory.CreateDocumentCollectionUri(_dbName, _collectionName), queryOptions)
+                .Where(r => r.PhoneNumber == phoneNumber);
+
+            return Task.FromResult<IList<Registration>>(registrationQuery.ToList());
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_client != null) _client.Dispose();
+            }
         }
     }
 }

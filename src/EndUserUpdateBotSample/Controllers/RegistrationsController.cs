@@ -7,22 +7,14 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using EndUserUpdateBotSample.Models;
-using Microsoft.Azure.Documents.Client;
-using Microsoft.Azure.Documents;
 using EndUserUpdateBotSample.Repositories;
 
 namespace EndUserUpdateBotSample.Controllers
 {
     public class RegistrationsController : Controller
     {
-        private const string EndpointUrl = "https://localhost:8081";
-        private const string PrimaryKey = "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==";
-        private const string DBName = "EndUserUpdateBot";
-        private const string CollectionName = "Registrations";
         private readonly IRegistrationRepository _repository;
         private Random random = new Random();
-
-        private DocumentClient client = new DocumentClient(new Uri(EndpointUrl), PrimaryKey);
 
         public RegistrationsController(IRegistrationRepository repository)
         {
@@ -33,12 +25,9 @@ namespace EndUserUpdateBotSample.Controllers
         // GET: Registrations
         public async Task<ActionResult> Index()
         {
-            FeedOptions queryOptions = new FeedOptions { MaxItemCount = -1 };
+            var registrations = await _repository.GetAll();
 
-            IQueryable<Registration> registrationQuery = this.client.CreateDocumentQuery<Registration>(
-                UriFactory.CreateDocumentCollectionUri(DBName, CollectionName), queryOptions);
-
-            return View(registrationQuery.ToList());
+            return View(registrations);
         }
 
         // GET: Registrations/Details/5
@@ -49,12 +38,12 @@ namespace EndUserUpdateBotSample.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            var registration = await client.ReadDocumentAsync<Registration>(UriFactory.CreateDocumentUri(DBName, CollectionName, id));
-            if (registration.Document == null)
+            var registration = await _repository.GetById(id);
+            if (registration == null)
             {
                 return HttpNotFound();
             }
-            return View(registration.Document);
+            return View(registration);
         }
 
         // GET: Registrations/Create
@@ -74,7 +63,7 @@ namespace EndUserUpdateBotSample.Controllers
             {
                 registration.SecurityCode = random.Next(99999).ToString("D5");
                 registration.Status = "Unconfirmed";
-                await client.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(DBName, CollectionName), registration);
+                await _repository.AddAsync(registration);
                 return RedirectToAction("Index");
             }
 
@@ -88,12 +77,12 @@ namespace EndUserUpdateBotSample.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            var registration = await client.ReadDocumentAsync<Registration>(UriFactory.CreateDocumentUri(DBName, CollectionName, id));
-            if (registration.Document == null)
+            var registration = await _repository.GetById(id);
+            if (registration== null)
             {
                 return HttpNotFound();
             }
-            return View(registration.Document);
+            return View(registration);
         }
 
         // POST: Registrations/Edit/5
@@ -105,20 +94,17 @@ namespace EndUserUpdateBotSample.Controllers
         {
             if (ModelState.IsValid)
             {
-                var previousRegistration = await client.ReadDocumentAsync<Registration>(UriFactory.CreateDocumentUri(DBName, CollectionName, registration.Id));
-                var previousDocument = previousRegistration.Document;
-                if (previousDocument == null)
+                var previousRegistration = await _repository.GetById(registration.Id);
+                if (previousRegistration == null)
                 {
                     return HttpNotFound();
                 }
 
-                previousDocument.Name = registration.Name;
-                if(previousDocument.PhoneNumber != registration.PhoneNumber)
+                if(previousRegistration.PhoneNumber != registration.PhoneNumber)
                 {
-                    previousDocument.Status = "Unconfirmed";
+                    registration.Status = "Unconfirmed";
                 }
-                previousDocument.PhoneNumber = registration.PhoneNumber;
-                await client.ReplaceDocumentAsync(UriFactory.CreateDocumentUri(DBName, CollectionName, registration.Id), previousRegistration.Document);
+                await _repository.UpdateAsync(registration);
                 return RedirectToAction("Index");
             }
             return View(registration);
@@ -131,12 +117,12 @@ namespace EndUserUpdateBotSample.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            var registration = await client.ReadDocumentAsync<Registration>(UriFactory.CreateDocumentUri(DBName, CollectionName, id));
-            if (registration.Document == null)
+            var registration = await _repository.GetById(id);
+            if (registration == null)
             {
                 return HttpNotFound();
             }
-            return View(registration.Document);
+            return View(registration);
         }
 
         // POST: Registrations/Delete/5
@@ -144,7 +130,7 @@ namespace EndUserUpdateBotSample.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> DeleteConfirmed(string id)
         {
-            var registration = await client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(DBName, CollectionName, id));
+            await _repository.DeleteAsync(id);
             return RedirectToAction("Index");
         }
 
@@ -152,7 +138,7 @@ namespace EndUserUpdateBotSample.Controllers
         {
             if (disposing)
             {
-                client.Dispose();
+                _repository.Dispose();
             }
             base.Dispose(disposing);
         }
