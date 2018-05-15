@@ -1,10 +1,12 @@
 ﻿using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
+using Autofac;
 using EndUserUpdateBotSample.Repositories;
-using EndUserUpdateBotSample.Services;
 using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Builder.Dialogs.Internals;
 using Microsoft.Bot.Connector;
 
 namespace EndUserUpdateBotSample.Controllers
@@ -13,23 +15,27 @@ namespace EndUserUpdateBotSample.Controllers
     public class MessagesController : ApiController
     {
         private readonly IRegistrationRepository _repository;
-        private readonly ISMSClient _smsClient;
+        private readonly ILifetimeScope _scope;
 
-        public MessagesController(IRegistrationRepository repository, ISMSClient smsClient)
+        public MessagesController(IRegistrationRepository repository, ILifetimeScope scope)
         {
             _repository = repository;
-            _smsClient = smsClient;
+            _scope = scope;
         }
 
         /// <summary>
         /// POST: api/Messages
         /// Receive a message from a user and reply to it
         /// </summary>
-        public async Task<HttpResponseMessage> Post([FromBody]Activity activity)
+        public async Task<HttpResponseMessage> Post([FromBody]Activity activity, CancellationToken token)
         {
             if (activity.Type == ActivityTypes.Message)
             {
-                await Conversation.SendAsync(activity, () => new Dialogs.RootDialog());
+                using (var scope = DialogModule.BeginLifetimeScope(_scope, activity.AsMessageActivity()))
+                {
+                    var postToBot = scope.Resolve<IPostToBot>();
+                    await postToBot.PostAsync(activity, token);
+                }
             }
             else
             {

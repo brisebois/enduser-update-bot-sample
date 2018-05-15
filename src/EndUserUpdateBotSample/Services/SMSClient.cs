@@ -19,12 +19,6 @@ namespace EndUserUpdateBotSample.Services
         {
             _client = client;
             _fromPhonenumber = fromPhoneNumber;
-
-            var accountSid = "ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
-            // Your Auth Token from twilio.com/console
-            var authToken = "auth_token";
-
-            _client = new TwilioRestClient(accountSid, authToken);
         }
 
         public async Task SendMessageAsync(string message, string phoneNumber)

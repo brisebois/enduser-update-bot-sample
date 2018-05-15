@@ -6,7 +6,7 @@ using Microsoft.Bot.Connector;
 namespace EndUserUpdateBotSample.Dialogs
 {
     [Serializable]
-    public class RootDialog : IDialog<object>
+    public class UpdateDialog : IDialog<object>
     {
         public Task StartAsync(IDialogContext context)
         {

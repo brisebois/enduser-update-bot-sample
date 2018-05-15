@@ -8,17 +8,20 @@ using System.Web;
 using System.Web.Mvc;
 using EndUserUpdateBotSample.Models;
 using EndUserUpdateBotSample.Repositories;
+using EndUserUpdateBotSample.Services;
 
 namespace EndUserUpdateBotSample.Controllers
 {
     public class RegistrationsController : Controller
     {
         private readonly IRegistrationRepository _repository;
+        private readonly ISMSClient _smsClient;
         private Random random = new Random();
 
-        public RegistrationsController(IRegistrationRepository repository)
+        public RegistrationsController(IRegistrationRepository repository, ISMSClient smsClient)
         {
             _repository = repository;
+            _smsClient = smsClient;
         }
 
 
@@ -64,6 +67,8 @@ namespace EndUserUpdateBotSample.Controllers
                 registration.SecurityCode = random.Next(99999).ToString("D5");
                 registration.Status = "Unconfirmed";
                 await _repository.AddAsync(registration);
+                await _smsClient.SendMessageAsync("Thank you for registering to our service. Please reply with your security code to activate your registration", registration.PhoneNumber);
+
                 return RedirectToAction("Index");
             }
 
