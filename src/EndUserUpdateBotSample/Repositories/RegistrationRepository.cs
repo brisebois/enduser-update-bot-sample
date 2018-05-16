@@ -70,7 +70,7 @@ namespace EndUserUpdateBotSample.Repositories
             return Task.FromResult<IList<Registration>>(registrationQuery.ToList());
         }
 
-        public Task<IList<Registration>> GetUnconfirmedByPhoneNumber(string phoneNumber)
+        public Task<IList<Registration>> GetByPhoneNumber(string phoneNumber)
         {
             FeedOptions queryOptions = new FeedOptions { MaxItemCount = -1 };
 
@@ -78,7 +78,9 @@ namespace EndUserUpdateBotSample.Repositories
                 UriFactory.CreateDocumentCollectionUri(_dbName, _collectionName), queryOptions)
                 .Where(r => r.PhoneNumber == phoneNumber);
 
-            return Task.FromResult<IList<Registration>>(registrationQuery.ToList());
+            var registrations = registrationQuery.ToList();
+
+            return Task.FromResult<IList<Registration>>(registrations); 
         }
 
         public void Dispose()

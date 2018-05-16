@@ -21,7 +21,7 @@ namespace EndUserUpdateBotSample.Repositories
 
         Task<IList<Registration>> GetByStatus(string status);
 
-        Task<IList<Registration>> GetUnconfirmedByPhoneNumber(string phoneNumber);
+        Task<IList<Registration>> GetByPhoneNumber(string phoneNumber);
 
         Task InitStore(string databaseName, string collectionName);
     }

@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using EndUserUpdateBotSample.Repositories;
 using Microsoft.Azure.Documents.Client;
+using Microsoft.Bot.Builder.Internals.Fibers;
 using System;
 using System.Web;
 using System.Web.Configuration;
@@ -18,7 +19,9 @@ namespace EndUserUpdateBotSample
             var dbName = WebConfigurationManager.AppSettings["CosmosDBName"];
             var collectionName = WebConfigurationManager.AppSettings["CosmosCollectionName"];
             builder.Register((c, p) => new DocumentClient(new Uri(uri), key));
-            builder.Register((c,p)=> new RegistrationRepository(c.Resolve<DocumentClient>(), dbName, collectionName)).As<IRegistrationRepository>();
+            builder.Register((c,p)=> new RegistrationRepository(c.Resolve<DocumentClient>(), dbName, collectionName))
+                .As<IRegistrationRepository>()
+                .Keyed<IRegistrationRepository>(FiberModule.Key_DoNotSerialize);
         }
 
         public static void InitStore(IDependencyResolver resolver)

@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,10 +32,16 @@ namespace EndUserUpdateBotSample.Controllers
         {
             if (activity.Type == ActivityTypes.Message)
             {
-                using (var scope = DialogModule.BeginLifetimeScope(_scope, activity.AsMessageActivity()))
+                try
                 {
-                    var postToBot = scope.Resolve<IPostToBot>();
-                    await postToBot.PostAsync(activity, token);
+                    using (var scope = DialogModule.BeginLifetimeScope(_scope, activity))
+                    {
+                        await Conversation.SendAsync(activity, () => scope.Resolve<IDialog<object>>());
+                    }
+                }
+                catch(Exception e)
+                {
+                    System.Diagnostics.Trace.TraceError(e.Message);
                 }
             }
             else

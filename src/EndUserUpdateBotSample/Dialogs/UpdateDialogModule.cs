@@ -1,11 +1,7 @@
 ﻿using Autofac;
 using Microsoft.Bot.Builder.Dialogs;
-using Microsoft.Bot.Builder.Internals.Fibers;
-using Microsoft.Bot.Builder.Luis;
+using Microsoft.Bot.Builder.Dialogs.Internals;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
 namespace EndUserUpdateBotSample.Dialogs
 {
@@ -17,7 +13,10 @@ namespace EndUserUpdateBotSample.Dialogs
 
             // register the top level dialog
             builder.RegisterType<UpdateDialog>().As<IDialog<object>>().InstancePerDependency();
-            builder.Register((c,p) => new UpdateDialog()).AsSelf().InstancePerDependency();
+            builder.RegisterType<UpdateDialog>().InstancePerDependency();
+            /*builder.Register((c, p) => p.TypedAs<Func<IDialog<object>>>())
+                .AsSelf()
+                .InstancePerMatchingLifetimeScope(DialogModule.LifetimeScopeTag);*/
         }
     }
 }

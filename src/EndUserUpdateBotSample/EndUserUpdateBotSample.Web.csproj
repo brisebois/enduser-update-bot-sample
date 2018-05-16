@@ -220,6 +220,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App_Start\BotConfig.cs" />
     <Compile Include="App_Start\TwilioConfig.cs" />
     <Compile Include="App_Start\StoreConfig.cs" />
     <Compile Include="App_Start\BundleConfig.cs" />
@@ -376,7 +377,7 @@
     <Content Include="Views\Registrations\Details.cshtml" />
     <Content Include="Views\Registrations\Edit.cshtml" />
     <Content Include="Views\Registrations\Index.cshtml" />
-    <Content Include="Views\Updates\Create.cshtml" />
+    <Content Include="Views\Updates\Publish.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
