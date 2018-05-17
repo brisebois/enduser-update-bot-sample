@@ -6,7 +6,9 @@ using Microsoft.Bot.Builder.Azure;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Dialogs.Internals;
 using Microsoft.Bot.Connector;
+using System.Security.Claims;
 using System.Web.Configuration;
+using System.Web.Helpers;
 using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
@@ -60,6 +62,7 @@ namespace EndUserUpdateBotSample
             var resolver = new AutofacDependencyResolver(Conversation.Container);
             DependencyResolver.SetResolver(resolver);
             StoreConfig.InitStore(resolver);
+            AntiForgeryConfig.UniqueClaimTypeIdentifier = ClaimTypes.NameIdentifier;
         }
     }
 }
