@@ -24,7 +24,10 @@ namespace EndUserUpdateBotSample
 
             var uri = WebConfigurationManager.AppSettings["CosmosUri"];
             var key = WebConfigurationManager.AppSettings["CosmosKey"];
-            var store = new DocumentDbBotDataStore(new DocumentClient(new Uri(uri), key));
+            var dbName = WebConfigurationManager.AppSettings["CosmosDBName"];
+
+
+            var store = new DocumentDbBotDataStore(new DocumentClient(new Uri(uri), key), dbName);
 
             builder.Register(c => store)
                 .Keyed<IBotDataStore<BotData>>(AzureModule.Key_DataStore)

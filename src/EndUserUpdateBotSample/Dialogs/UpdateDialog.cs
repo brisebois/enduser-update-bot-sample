@@ -60,7 +60,6 @@ namespace EndUserUpdateBotSample.Dialogs
         private ConversationContext CreateConversationContext(Activity activity)
         {
             // Extract data from the user's message that the bot will need later to send an ad hoc message to the user. 
-            // Store the extracted data in a custom class "ConversationStarter" (not shown here).
             var conversationContext = new ConversationContext
             {
                 ToId = activity.From.Id,

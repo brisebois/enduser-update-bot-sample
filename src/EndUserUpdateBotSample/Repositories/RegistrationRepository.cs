@@ -29,12 +29,14 @@ namespace EndUserUpdateBotSample.Repositories
 
         public async Task DeleteAsync(string id)
         {
-            var registration = await _client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(_dbName, _collectionName, id));
+            var requestOptions = new RequestOptions { PartitionKey = new PartitionKey(id) };
+            var registration = await _client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(_dbName, _collectionName, id), requestOptions);
         }
 
         public async Task UpdateAsync(Registration registration)
         {
-            await _client.ReplaceDocumentAsync(UriFactory.CreateDocumentUri(_dbName, _collectionName, registration.Id), registration);
+            var requestOptions = new RequestOptions { PartitionKey = new PartitionKey(registration.Id) };
+            await _client.ReplaceDocumentAsync(UriFactory.CreateDocumentUri(_dbName, _collectionName, registration.Id), registration, requestOptions);
         }
 
         public async Task InitStore(string dbName, string collectionName)
@@ -45,7 +47,7 @@ namespace EndUserUpdateBotSample.Repositories
 
         public Task<IList<Registration>> GetAll()
         {
-            FeedOptions queryOptions = new FeedOptions { MaxItemCount = -1 };
+            FeedOptions queryOptions = new FeedOptions { MaxItemCount = -1, EnableCrossPartitionQuery = true };
 
             IQueryable<Registration> registrationQuery = _client.CreateDocumentQuery<Registration>(
                 UriFactory.CreateDocumentCollectionUri(_dbName, _collectionName), queryOptions);
@@ -55,13 +57,14 @@ namespace EndUserUpdateBotSample.Repositories
 
         public async Task<Registration> GetById(string id)
         {
-            var registration = await _client.ReadDocumentAsync<Registration>(UriFactory.CreateDocumentUri(_dbName, _collectionName, id));
+            var requestOptions = new RequestOptions { PartitionKey = new PartitionKey(id) };
+            var registration = await _client.ReadDocumentAsync<Registration>(UriFactory.CreateDocumentUri(_dbName, _collectionName, id), requestOptions);
             return registration;
         }
 
         public Task<IList<Registration>> GetByStatus(string status)
         {
-            FeedOptions queryOptions = new FeedOptions { MaxItemCount = -1 };
+            FeedOptions queryOptions = new FeedOptions { MaxItemCount = -1, EnableCrossPartitionQuery = true };
 
             IQueryable<Registration> registrationQuery = _client.CreateDocumentQuery<Registration>(
                 UriFactory.CreateDocumentCollectionUri(_dbName, _collectionName), queryOptions)
@@ -72,7 +75,7 @@ namespace EndUserUpdateBotSample.Repositories
 
         public Task<IList<Registration>> GetByPhoneNumber(string phoneNumber)
         {
-            FeedOptions queryOptions = new FeedOptions { MaxItemCount = -1 };
+            FeedOptions queryOptions = new FeedOptions { MaxItemCount = -1, EnableCrossPartitionQuery = true };
 
             IQueryable<Registration> registrationQuery = _client.CreateDocumentQuery<Registration>(
                 UriFactory.CreateDocumentCollectionUri(_dbName, _collectionName), queryOptions)
@@ -80,7 +83,7 @@ namespace EndUserUpdateBotSample.Repositories
 
             var registrations = registrationQuery.ToList();
 
-            return Task.FromResult<IList<Registration>>(registrations); 
+            return Task.FromResult<IList<Registration>>(registrations);
         }
 
         public void Dispose()

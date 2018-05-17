@@ -109,7 +109,10 @@ namespace EndUserUpdateBotSample.Controllers
                 {
                     registration.Status = "Unconfirmed";
                 }
-                await _repository.UpdateAsync(registration);
+                previousRegistration.PhoneNumber = registration.PhoneNumber;
+                previousRegistration.Name = registration.Name;
+                await _repository.UpdateAsync(previousRegistration);
+
                 return RedirectToAction("Index");
             }
             return View(registration);
